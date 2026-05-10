@@ -1,0 +1,16 @@
+[project]
+name = "claude-code-like"
+version = "0.1.0"
+description = "A tiny Claude Code-like CLI powered by DeepSeek."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "openai>=1.51.0",
+]
+
+[project.scripts]
+ccdeep = "claude_code_like:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
