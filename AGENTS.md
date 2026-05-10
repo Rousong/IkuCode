@@ -59,7 +59,7 @@ Returns:
 
 ## 代码简介
 
-这是一个使用 Python 和 DeepSeek API 的终端对话程序，目标是以尽量少的代码提供类似 Claude Code 的基本交互体验，支持多轮对话、本地 tool use，以及通过 `.env` 管理本地 API 配置。
+这是一个使用 Python 和 DeepSeek API 的终端对话程序，目标是以尽量少的代码提供类似 Claude Code 的基本交互体验，支持多轮对话、本地 tool use、启动欢迎横幅，以及通过 `.env` 管理本地 API 配置。
 
 ## 目录结构
 
@@ -70,7 +70,8 @@ IkuCode/ # 项目根目录，存放整个终端对话程序及说明文档。
 ├── .gitignore # Git 忽略规则，当前用于忽略本地 .env 文件。
 ├── README.md # 项目使用说明，包含环境变量、uv 命令和交互方式。
 ├── claude_code_like.py # 主模块，仅保留系统提示词和 main 入口。
-├── methods.py # 对话流程与模型调用模块，负责 .env 加载、会话循环和 tool call 编排。
-└── pyproject.toml # uv / Python 工程配置，声明依赖和命令入口。
-└── tools.py # 本地工具定义模块，负责工具函数、路径约束和工具元数据。
+├── methods.py # 对话流程与模型调用模块，负责 .env 加载、启动横幅、会话循环和 tool call 编排。
+├── pyproject.toml # uv / Python 工程配置，声明依赖和命令入口。
+├── tools.py # 本地工具定义模块，负责工具函数、路径约束和工具元数据。
+└── uv.lock # uv 锁文件，记录依赖解析结果并用于环境同步。
 ```

@@ -11,6 +11,8 @@ Description: 封装环境加载、模型调用与命令行对话流程。
 
 import json
 import os
+import shutil
+from getpass import getuser
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +22,9 @@ from tools import TOOL_FUNCS, TOOLS
 
 
 ROOT = Path(__file__).resolve().parent
+APP_TITLE = "IKU-Code"
+APP_VERSION = "v0.1.0"
+COMMAND_HELP = "Commands: /help /clear /history /exit"
 
 
 # ------------------------------------------------------------
@@ -48,6 +53,162 @@ def load_local_env(env_path: str = ".env") -> None:
         key = key.strip()
         value = value.strip().strip('"').strip("'")
         os.environ.setdefault(key, value)
+
+
+# ------------------------------------------------------------
+# 获取模型名
+# ------------------------------------------------------------
+def get_model_name() -> str:
+    """
+    获取当前配置的模型名称。
+
+    Args:
+        None
+
+    Returns:
+        当前使用的模型名称。
+    """
+    return os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
+
+
+# ------------------------------------------------------------
+# 获取展示路径
+# ------------------------------------------------------------
+def get_display_path() -> str:
+    """
+    获取适合在终端展示的项目路径。
+
+    Args:
+        None
+
+    Returns:
+        使用波浪线缩写后的项目路径字符串。
+    """
+    root_text = str(ROOT)
+    home_text = str(Path.home())
+    if root_text.startswith(home_text):
+        return root_text.replace(home_text, "~", 1)
+    return root_text
+
+
+# ------------------------------------------------------------
+# 截断文本
+# ------------------------------------------------------------
+def clip_text(text: str, width: int) -> str:
+    """
+    根据给定宽度截断文本。
+
+    Args:
+        text: 原始文本。
+        width: 允许显示的最大宽度。
+
+    Returns:
+        截断后的文本；宽度不足时返回省略形式。
+    """
+    if width <= 0:
+        return ""
+    if len(text) <= width:
+        return text
+    if width <= 1:
+        return text[:width]
+    return f"{text[:width - 1]}…"
+
+
+# ------------------------------------------------------------
+# 构建内容行
+# ------------------------------------------------------------
+def format_line(text: str, width: int, align: str = "left") -> str:
+    """
+    按指定宽度和对齐方式格式化单行文本。
+
+    Args:
+        text: 需要展示的文本。
+        width: 内容区域宽度。
+        align: 对齐方式，支持 left 或 center。
+
+    Returns:
+        固定宽度的文本行。
+    """
+    clipped = clip_text(text, width)
+    if align == "center":
+        return clipped.center(width)
+    return clipped.ljust(width)
+
+
+# ------------------------------------------------------------
+# 渲染欢迎横幅
+# ------------------------------------------------------------
+def render_banner() -> str:
+    """
+    生成类似 Claude Code 风格的启动欢迎横幅。
+
+    Args:
+        None
+
+    Returns:
+        渲染完成的多行横幅字符串。
+    """
+    terminal_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+    inner_width = max(78, min(terminal_width - 2, 118))
+    separator = "│"
+    gutter = "  "
+    column_width = (inner_width - len(gutter) - 2) // 2
+    left_width = column_width
+    right_width = inner_width - len(gutter) - 2 - left_width
+
+    username = getuser()
+    model_name = get_model_name()
+    left_lines = [
+        "",
+        f"Welcome back {username}!",
+        "",
+        "▐▛███▜▌",
+        "▝▜█████▛▘",
+        "  ▘▘ ▝▝",
+        "",
+        f"{model_name} · Tool Use Enabled",
+        f"· {username}'s Local Workspace",
+        get_display_path(),
+    ]
+    right_lines = [
+        "Tips for getting started",
+        "Run /help to see available commands",
+        "Run /clear to reset the current chat history",
+        "",
+        "What's new",
+        "Simple Claude-like terminal welcome screen",
+        "DeepSeek multi-turn chat with tool use",
+        "Local .env configuration support",
+        "",
+        "Type your prompt below to begin",
+    ]
+
+    line_count = max(len(left_lines), len(right_lines))
+    while len(left_lines) < line_count:
+        left_lines.append("")
+    while len(right_lines) < line_count:
+        right_lines.append("")
+
+    title = f" {APP_TITLE} {APP_VERSION} "
+    top = f"╭{title}{'─' * max(0, inner_width - len(title))}╮"
+    bottom = f"╰{'─' * inner_width}╯"
+
+    body_lines = []
+    for left_text, right_text in zip(left_lines, right_lines):
+        left_align = "center"
+        if left_text.startswith(model_name) or left_text.startswith("· ") or left_text.startswith("~") or left_text.startswith("/"):
+            left_align = "left"
+
+        body = (
+            f"{separator}"
+            f"{format_line(left_text, left_width, align=left_align)}"
+            f"{gutter}"
+            f"{format_line(right_text, right_width)}"
+            f"{separator}"
+        )
+        body_lines.append(body)
+
+    return "\n".join([top, *body_lines, bottom])
 
 
 # ------------------------------------------------------------
@@ -88,9 +249,8 @@ def call_model(client: OpenAI, messages: list[dict[str, Any]]) -> Any:
     Returns:
         模型返回的原始响应对象。
     """
-    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
     return client.chat.completions.create(
-        model=model,
+        model=get_model_name(),
         messages=messages,
         tools=TOOLS,
         tool_choice="auto",
@@ -170,11 +330,12 @@ def run_cli(system_prompt: str) -> None:
     Returns:
         None
     """
+    load_local_env()
     client = build_client()
     messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
 
-    print("Claude Code Like")
-    print("Commands: /clear /history /exit")
+    print(render_banner())
+    print(COMMAND_HELP)
 
     while True:
         try:
@@ -188,6 +349,9 @@ def run_cli(system_prompt: str) -> None:
         if user_input == "/exit":
             print("bye")
             break
+        if user_input == "/help":
+            print(COMMAND_HELP)
+            continue
         if user_input == "/clear":
             messages = [{"role": "system", "content": system_prompt}]
             print("history cleared")
