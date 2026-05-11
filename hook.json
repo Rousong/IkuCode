@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh script/play_voice_macos.sh StartTask.mp3",
+            "statusMessage": "Playing session start voice"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh script/play_voice_macos.sh NeedConfirm1.mp3",
+            "statusMessage": "Playing permission request voice"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh script/play_voice_macos.sh MissionComplete1.mp3",
+            "statusMessage": "Playing stop voice"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -70,8 +70,23 @@ IkuCode/ # 项目根目录，存放整个终端对话程序及说明文档。
 ├── .gitignore # Git 忽略规则，当前用于忽略本地 .env 文件。
 ├── README.md # 项目使用说明，包含环境变量、uv 命令和交互方式。
 ├── claude_code_like.py # 主模块，仅保留系统提示词和 main 入口。
+├── hook.json # 当前 macOS 可直接使用的本地 hook 配置文件，绑定提示音播放命令。
+├── hook.macos.json # macOS 版本 hook 配置备份，使用 shell 脚本播放提示音。
+├── hook.windows.json # Windows 版本 hook 配置备份，使用 PowerShell 脚本播放提示音。
+├── hooks.json # 既有 hook 配置文件，存放其他 Codex hook 事件命令。
 ├── methods.py # 对话流程与模型调用模块，负责 .env 加载、启动横幅、会话循环和 tool call 编排。
 ├── pyproject.toml # uv / Python 工程配置，声明依赖和命令入口。
+├── script/ # 存放 hook 调用的本地辅助脚本。
+│   ├── AGENTS.md # script 子目录协作说明文档，记录此目录约束、代码简介和结构。
+│   ├── play_voice_macos.sh # macOS 音频播放脚本，使用 afplay 播放 voice 目录中的 MP3。
+│   └── play_voice_windows.ps1 # Windows 音频播放脚本，使用系统 MCI 接口播放 voice 目录中的 MP3。
 ├── tools.py # 本地工具定义模块，负责工具函数、路径约束和工具元数据。
+├── voice/ # 存放 hook 事件提示音频资源。
+│   ├── AGENTS.md # voice 子目录协作说明文档，记录此目录约束、资源简介和结构。
+│   ├── MissionComplete1.mp3 # 任务完成提示音频。
+│   ├── MissionComplete2.mp3 # 备用任务完成提示音频。
+│   ├── NeedConfirm1.mp3 # 权限确认提示音频。
+│   ├── NeedConfirm2.mp3 # 备用权限确认提示音频。
+│   └── StartTask.mp3 # 会话开始提示音频。
 └── uv.lock # uv 锁文件，记录依赖解析结果并用于环境同步。
 ```

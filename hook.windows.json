@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File script/play_voice_windows.ps1 StartTask.mp3",
+            "statusMessage": "Playing session start voice"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File script/play_voice_windows.ps1 NeedConfirm1.mp3",
+            "statusMessage": "Playing permission request voice"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File script/play_voice_windows.ps1 MissionComplete1.mp3",
+            "statusMessage": "Playing stop voice"
+          }
+        ]
+      }
+    ]
+  }
+}
